@@ -1,6 +1,7 @@
 Revision history for Crypt-Passphrase-Bcrypt
 
 {{$NEXT}}
+          - Switch to using Crypt::Bcrypt
 
 0.001     2021-03-07 23:26:17+01:00 Europe/Amsterdam
           Initial release to an unsuspecting world
