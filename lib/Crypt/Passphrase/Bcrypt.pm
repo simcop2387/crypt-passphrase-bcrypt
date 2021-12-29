@@ -70,6 +70,10 @@ sub verify_password {
 
 #ABSTRACT: A bcrypt encoder for Crypt::Passphrase
 
+=head1 DESCRIPTION
+
+This class implements a bcrypt encoder for Crypt::Passphrase. L<Crypt::Passphrase::Argon2|Crypt::Passphrase::Argon2> is recommended over this module as an encoder, as that provides memory-hardness and more easily allows for long passwords.
+
 =method new(%args)
 
 =over 4
