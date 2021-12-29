@@ -7,36 +7,63 @@ use parent 'Crypt::Passphrase::Encoder';
 
 use Carp 'croak';
 use Crypt::Bcrypt qw/bcrypt bcrypt_check/;
+use Digest::SHA 'hmac_sha256';
+use MIME::Base64 'encode_base64';
 
 sub new {
 	my ($class, %args) = @_;
 	my $subtype = $args{subtype} || '2b';
 	croak "Unknown subtype $subtype" unless $subtype =~ / \A 2 [abxy] \z /x;
+	croak 'Invalid hash' if exists $args{hash} && $args{hash} ne 'sha256';
 	return bless {
 		cost    => $args{cost} || 14,
 		subtype => $subtype,
+		hash    => $args{hash} || '',
 	}, $class;
 }
+
+my $subtype = qr/2[abxy]/;
+my $cost = qr/\d{2}/;
+my $salt_qr = qr{ [./A-Za-z0-9]{22} }x;
 
 sub hash_password {
 	my ($self, $password) = @_;
 	my $salt = $self->random_bytes(16);
-	return bcrypt($password, $self->{subtype}, $self->{cost}, $salt);
+	if ($self->{hash}) {
+		(my $encoded_salt = encode_base64($salt, "")) =~ tr{A-Za-z0-9+/=}{./A-Za-z0-9}d;
+		my $hashed_password = encode_base64(hmac_sha256($password, $encoded_salt), "");
+		my $hash = bcrypt($hashed_password, $self->{subtype}, $self->{cost}, $salt);
+		$hash =~ s{ ^ \$ ($subtype) \$ ($cost) \$ ($salt_qr) }{\$bcrypt-sha256\$v=2,t=$1,r=$2\$$3\$}x;
+		return $hash;
+	}
+	else {
+		return bcrypt($password, $self->{subtype}, $self->{cost}, $salt);
+	}
 }
 
 sub needs_rehash {
 	my ($self, $hash) = @_;
-	my ($type, $cost) = $hash =~ / \A \$ (2[abxy]) \$ ([0-9]{2}) \$ /x or return 1;
-	return 1 if $type ne $self->{subtype} || $cost < $self->{cost};
+	if ($hash =~ / \A \$ ($subtype) \$ ($cost) \$ /x) {
+		return 0 if $1 eq $self->{subtype} && $2 >= $self->{cost} && $self->{hash} eq '';
+	}
+	elsif ($hash =~ / ^ \$ bcrypt-sha256 \$ v=2,t=($subtype),r=($cost) \$ /x) {
+		return 0 if $1 eq $self->{subtype} && $2 >= $self->{cost} && $self->{hash} eq 'sha256';
+	}
+	return 1;
 }
 
 sub crypt_subtypes {
-	return qw/2a 2b 2x 2y/;
+	return qw/2a 2b 2x 2y bcrypt-sha256/;
 }
 
 sub verify_password {
 	my ($class, $password, $hash) = @_;
-	return bcrypt_check($password, $hash);
+	if ($hash =~ s/ ^ \$ bcrypt-sha256 \$ v=2,t=($subtype),r=($cost) \$ ($salt_qr) \$ /\$$1\$$2\$$3/x) {
+		return bcrypt_check(encode_base64(hmac_sha256($password, $3), ""), $hash);
+	}
+	else {
+		return bcrypt_check($password, $hash);
+	}
 }
 
 1;
@@ -75,6 +102,10 @@ This is a very broken version that is only useful for compatibility with ancient
 
 This is C<2b> by default, and you're unlikely to want to change this.
 
+=item * hash
+
+Pre-hash the password using the specified hash. Currently only sha256 is supported. This is mainly useful to get around the 72 character limit. This uses a salt-keyed hash to prevent password shucking.
+
 =back
 
 =method hash_password($password)
@@ -83,11 +114,11 @@ This hashes the passwords with bcrypt according to the specified settings and a 
 
 =method needs_rehash($hash)
 
-This returns true if the hash uses a different cipher or subtype, or if any of the cost is lower that desired by the encoder.
+This returns true if the hash uses a different cipher or subtype, if any of the cost is lower that desired by the encoder or if the prehashing doesn't match.
 
 =method crypt_types()
 
-This class supports the following crypt types: C<2a> and C<2>.
+This returns the above described subtypes, as well as C<bcrypt-sha256> for prehashed bcrypt.
 
 =method verify_password($password, $hash)
 

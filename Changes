@@ -1,6 +1,7 @@
 Revision history for Crypt-Passphrase-Bcrypt
 
 {{$NEXT}}
+          - Added prehash support
 
 0.002     2021-12-29 01:14:31+01:00 Europe/Amsterdam
           - Switch to using Crypt::Bcrypt
