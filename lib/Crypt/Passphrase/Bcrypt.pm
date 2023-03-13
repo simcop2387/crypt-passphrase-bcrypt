@@ -3,7 +3,7 @@ package Crypt::Passphrase::Bcrypt;
 use strict;
 use warnings;
 
-use parent 'Crypt::Passphrase::Encoder';
+use Crypt::Passphrase 0.010 -encoder;
 
 use Carp 'croak';
 use Crypt::Bcrypt 0.011 qw/bcrypt bcrypt_prehashed bcrypt_check_prehashed bcrypt_needs_rehash bcrypt_supported_prehashes/;
