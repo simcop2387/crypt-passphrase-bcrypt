@@ -47,6 +47,16 @@ sub verify_password {
 
 #ABSTRACT: A bcrypt encoder for Crypt::Passphrase
 
+=head1 SYNOPSIS
+
+ my $passphrase = Crypt::Passphrase->new(
+   encoder => {
+     module => 'Bcrypt',
+     cost   => 14,
+     hash   => 'sha256',
+   },
+ );
+
 =head1 DESCRIPTION
 
 This class implements a bcrypt encoder for Crypt::Passphrase. For high-end parameters L<Crypt::Passphrase::Argon2|Crypt::Passphrase::Argon2> is recommended over this module as an encoder, as that provides memory-hardness and more easily allows for long passwords.
@@ -57,7 +67,7 @@ This class implements a bcrypt encoder for Crypt::Passphrase. For high-end param
 
 =item * cost
 
-This is the cost factor that is used to hash passwords.
+This is the cost factor that is used to hash passwords. It currently defaults to C<14>, but this may change in the future.
 
 =item * subtype
 
@@ -65,11 +75,11 @@ This is the cost factor that is used to hash passwords.
 
 =item * C<2b>
 
-This is the subtype the rest of the world has been using since 2014
+This is the subtype everyone has been using since 2014.
 
 =item * C<2y>
 
-This type is considered equivalent to C<2b>.
+This type is considered equivalent to C<2b>. It is common on php but not elsewhere.
 
 =item * C<2a>
 
