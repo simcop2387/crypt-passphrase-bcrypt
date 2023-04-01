@@ -1,6 +1,7 @@
 Revision history for Crypt-Passphrase-Bcrypt
 
 {{$NEXT}}
+          - Explicitly mark encoder as not binary safe
 
 0.006     2023-03-19 13:48:23+01:00 Europe/Amsterdam
           - Support more prehash types (e.g. sha384 and sha512)

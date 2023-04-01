@@ -43,6 +43,10 @@ sub verify_password {
 	return bcrypt_check_prehashed($password, $hash);
 }
 
+sub binary_safe {
+	return 0;
+}
+
 1;
 
 #ABSTRACT: A bcrypt encoder for Crypt::Passphrase
