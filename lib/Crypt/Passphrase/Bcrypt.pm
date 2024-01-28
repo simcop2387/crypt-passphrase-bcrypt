@@ -61,7 +61,9 @@ sub verify_password {
 
 This class implements a bcrypt encoder for Crypt::Passphrase. For high-end parameters L<Crypt::Passphrase::Argon2|Crypt::Passphrase::Argon2> is recommended over this module as an encoder, as that provides memory-hardness and more easily allows for long passwords.
 
-=method new(%args)
+=head2 Configuration
+
+It accepts the following arguments:
 
 =over 4
 
@@ -99,18 +101,6 @@ Pre-hash the password using the specified hash. It will support any hash support
 
 =back
 
-=method hash_password($password)
+=head2 SUPPORTED CRYPT TYPES
 
-This hashes the passwords with bcrypt according to the specified settings and a random salt (and will thus return a different result each time).
-
-=method needs_rehash($hash)
-
-This returns true if the hash uses a different cipher or subtype, if any of the cost is lower that desired by the encoder or if the prehashing doesn't match.
-
-=method crypt_types()
-
-This returns the above described subtypes, as well as C<bcrypt-sha256> for prehashed bcrypt.
-
-=method verify_password($password, $hash)
-
-This will check if a password matches a bcrypt hash.
+It supports the above described subtypes, as well as C<bcrypt-sha256>, C<bcrypt-sha384> and C<bcrypt-sha512> for prehashed bcrypt.
