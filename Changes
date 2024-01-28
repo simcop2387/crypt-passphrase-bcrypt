@@ -1,6 +1,7 @@
 Revision history for Crypt-Passphrase-Bcrypt
 
 {{$NEXT}}
+          - Add Crypt::Passphrase::Bcrypt::Encrypted
 
 0.007     2023-04-01 19:51:03+02:00 Europe/Amsterdam
           - Explicitly mark encoder as not binary safe
